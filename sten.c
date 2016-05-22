@@ -30,6 +30,7 @@ int read(char *name);
 int write(char *name);
 unsigned char *img;
 int test(unsigned char *img);
+void aimwrite(unsigned char *img);
 
 int main(int argc, char *argv[]){
 	if ((argc!=5)||strcmp(argv[1],"-f")!=0||strcmp(argv[3],"-i")!=0){
@@ -40,34 +41,38 @@ int main(int argc, char *argv[]){
 	struct stat st;
 		stat(argv[2],&st);
 	long s=st.st_size;
-	if (read(argv[4]) == 0){ 
-		printf("Невозможно открыть\\прочитать изначальный файл\n");
-		exit(3);
-	}
-	if (write(argv[4])==0){
-		printf("Невозможно записать в файл");
-		exit(3);
-	}
+		if (read(argv[4]) == 0){ 
+			printf("Невозможно открыть\\прочитать изначальный файл\n");
+			exit(3);
+		}
+		if (write(argv[4])==0){
+			printf("Невозможно записать в файл");
+			exit(3);
+		}
 	long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
-	printf("%ld %ld",s,maxlen);
-	if (maxlen<s){
-		printf("Файл для шифрования не возможно поместить в данное изображение\n");
-		exit(2);
-	}
-	
-			/*long step=maxlen/s+1;
-			long int i=0;
-			do{
-					++i;
-				}while(img!='\0');
-				printf("%ld\n",i);		
-				FILE *Key,*bmp,*ex; //key - файл с ключом для дешифровки, bmp - файл из которого необходимо жешифровать информацию, ex -  файл, в который записывается дешифрованная информация
-				char key[4]="y.ek",isx[30],out[30];
-				if (fopen(key,"rb")==0){
+		if (maxlen<s){
+			printf("Файл для шифрования не возможно поместить в данное изображение\n");
+			exit(2);
+		}
+		if (test(img)==5){
+			long step=maxlen/s+1;
+			FILE *Key;
+			Key=fopen("y.ek","wb");
+			fwrite(&step,4,1,Key);
+			fclose(Key);
+			aimwrite(img);
+		}else{
+			FILE *Key;
+			unsigned int key;
+				if (fopen("y.ek","rb")==0){
 					printf("Файл, содержащий ключ для дешифрования, не найден.");
 					exit(1);
 				}
-				*/
+				Key=fopen("y.ek","rb");
+				fread(&key,4,1,Key);
+				fclose(Key);
+		}		
+			
 	return 0;
 }
 int read(char *name){
@@ -128,6 +133,7 @@ int write(char *name){
 		fclose(fp);
 	return TRUE;
 }
+
 int test(unsigned char *img){
 	if (img[0]&1!=1) return shif;
 	if (img[1]&1!=1) return shif;
@@ -145,4 +151,20 @@ int test(unsigned char *img){
 	if (img[13]&1!=1) return shif;
 		else
 			return deshif;
+}
+void aimwrite(unsigned char *img){
+	img[0]|=1;
+	img[1]|=1;
+	img[2]&=254;
+	img[3]&=254;
+	img[4]&=254;
+	img[5]&=254;
+	img[6]&=254;
+	img[7]&=254;
+	img[8]|=1;
+	img[9]|=1;
+	img[10]|=1;
+	img[11]&=254;
+	img[12]&=254;
+	img[13]|=1;
 }
