@@ -27,33 +27,37 @@ struct BMPheader{
 int read(char *name), write(char *name);
 unsigned char *img;
 
-int main(void){
-	struct stat st;
-	FILE *sh;
-	char nsh[30];
-	scanf("%s",&nsh[30]);
-	stat(&nsh[30],&st);
-	long s=st.st_size;
-	if (read("test.bmp") == 0) {
-		printf("всё плохо\n");
+int main(int argc, char * argv[]){
+	int par;
+	for (par=1;par<argc;++par){
+		if (strcmp(argv[par], "-c")==0){
+			struct stat st;
+			FILE *sh,*bmp; //sh - файл который необхожимо зашифровать,bmp - исходный файл
+			char nsh[30],isx[30];
+				printf("Введите название BMP-файла, который будет взят за основу для шифрования.\n");
+				scanf("%s",&isx[30]);
+				printf("Введите название файла, который необходимо зашифровать в BMP-изображение, указанное выше.\n");
+				scanf("%s",&nsh[30]);
+				stat(&nsh[30],&st);
+			long s=st.st_size;
+			if (read(&isx[30]) == 0) 
+				printf("Невозможно открыть\\прочитать изначальный файл\n");
+			if (write(&isx[30])==0)
+				printf("Невозможно записать в файл");
+			long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
+			if (maxlen<s)
+				printf("Файл для шифрования не возможно поместить в данное изображение\n");
+		int i=0;
+		long step,size;
+		}
 	}
-	if (write("3.bmp") == 0) {
-		printf("всё плохо\n");
-	}
-	long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
-	if (maxlen<s)
-		printf("Файл для шифрования не возможно поместить в данное изображение\n");
-	int i=0;
-	long step,size;
 	return 0;
 }
 
 int read(char *name){
 	FILE *fp;
-	if ((fp=fopen(name, "rb"))==NULL) {
-		printf("Ошибка при открытии файла\n");
-		return FALSE;
-	}
+	if ((fp=fopen(name, "rb"))==NULL) 
+		return FALSE;	
 	fread(&BMPHDR.bfType1, 1, 1, fp);
 	fread(&BMPHDR.bfType2, 1, 1, fp);
 	fread(&BMPHDR.bfSize, 4, 1, fp);
@@ -71,10 +75,8 @@ int read(char *name){
 	fread(&BMPHDR.biYPelsPerMeter, 4, 1, fp);
 	fread(&BMPHDR.biClrUsed, 4, 1, fp); 
 	fread(&BMPHDR.biClrImportant, 4, 1, fp);	
-	if(BMPHDR.bfType1 !='B' || BMPHDR.bfType2 !='M' || BMPHDR.biBitCount !=24) {
-		printf("Файл повреждён\n");
+	if(BMPHDR.bfType1 !='B' || BMPHDR.bfType2 !='M' || BMPHDR.biBitCount !=24) 
 		return FALSE;
-	}
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
 	int nx=(3*x+3) & (-4);
 		img=(unsigned char *) calloc(nx*y, sizeof(char));
@@ -84,10 +86,8 @@ int read(char *name){
 }
 int write(char *name){
 	FILE *fp;
-	if ((fp=fopen(name, "wb"))==NULL) {
-		printf("Ошибка при открытии файла\n");
+	if ((fp=fopen(name, "wb"))==NULL)
 		return FALSE;
-	}
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
 	int nx=(3*x+3) & (-4);
 		fwrite(&BMPHDR.bfType1, 1, 1, fp);
