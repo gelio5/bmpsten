@@ -27,28 +27,39 @@ struct BMPheader{
 int read(char *name), write(char *name);
 unsigned char *img;
 
-int main(int argc, char * argv[]){
+int main(int argc, char *argv[]){
 	int par;
-	for (par=1;par<argc;++par){
-		if (strcmp(argv[par], "-c")==0){
+	if ((argc!=5)||strcmp(argv[1],"-f")!=0||strcmp(argv[3],"-i")!=0){
+		printf("Для работы программы необходимы ключи:\n");
+		printf("-f\t-для обозначения файла который необходимо зашифровать.\n");
+		printf("-i\t-для изображения в которое необходимо зашифровать.\n");
+	}
+/*	for (par=1;par<argc;++par){
+		if (strcmp(argv[par], "-c")==0){*/
 			struct stat st;
-			FILE *sh,*bmp; //sh - файл который необхожимо зашифровать,bmp - исходный файл
+			FILE *sh; //sh - файл который необхожимо зашифровать
 			char nsh[30],isx[30];
-				printf("Введите название BMP-файла, который будет взят за основу для шифрования.\n");
-				scanf("%s",&isx[30]);
-				printf("Введите название файла, который необходимо зашифровать в BMP-изображение, указанное выше.\n");
-				scanf("%s",&nsh[30]);
-				stat(&nsh[30],&st);
+				strcpy(isx,argv[4]);
+				strcpy(nsh,argv[2]);
+/*				stat(&nsh[30],&st);
 			long s=st.st_size;
 			if (read(&isx[30]) == 0) 
 				printf("Невозможно открыть\\прочитать изначальный файл\n");
 			if (write(&isx[30])==0)
 				printf("Невозможно записать в файл");
-			long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
-			if (maxlen<s)
+			long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
+			if (maxlen<s){
 				printf("Файл для шифрования не возможно поместить в данное изображение\n");
-		int i=0;
-		long step;
+				exit(2);
+			}
+			else{
+				long step=maxlen/s+1;
+				long int i=0;
+				do{
+					++i;
+				}while(img!='\0');
+				printf("%ld\n",i);
+			}
 		}
 		else
 			if(strcmp(argv[par],"-d")==0){
@@ -66,14 +77,8 @@ int main(int argc, char * argv[]){
 				}
 				printf("Введите название файла, в который необходимо записать результат дешифрования.\n");
 				scanf("%s",&out[30]);
-			}
-			else{
-				printf("Для работы программы необходимы ключи:\n");
-				printf("-c\t-для кодирования информации в изображение.\n");
-				printf("-d\t-для декодирования информации из изображения.\n");
-			}
-		
-	}
+			}		
+	}*/
 	return 0;
 }
 
