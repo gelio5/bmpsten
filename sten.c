@@ -48,3 +48,67 @@ int main(void){
 	//	}
 	return 0;
 }
+
+int read(char *name){
+	FILE *fp;
+	if ((fp=fopen(name, "rb"))==NULL) {
+		printf("Ошибка при открытии файла\n");
+		return FALSE;
+	}
+	fread(&BMPHDR.bfType1, 1, 1, fp);
+	fread(&BMPHDR.bfType2, 1, 1, fp);
+	fread(&BMPHDR.bfSize, 4, 1, fp);
+	fread(&BMPHDR.bfReserved1, 2, 1, fp);
+	fread(&BMPHDR.bfReserved2, 2, 1, fp);
+	fread(&BMPHDR.bfOffBits, 4, 1, fp);
+	fread(&BMPHDR.biSize, 4, 1, fp);
+	fread(&BMPHDR.biWidth, 4, 1, fp);
+	fread(&BMPHDR.biHeight, 4, 1, fp);
+	fread(&BMPHDR.biPlanes, 2, 1, fp);
+	fread(&BMPHDR.biBitCount, 2, 1, fp);
+	fread(&BMPHDR.biCompression, 4, 1, fp);
+	fread(&BMPHDR.biSizeImage, 4, 1, fp);
+	fread(&BMPHDR.biXPelsPerMeter, 4, 1, fp);
+	fread(&BMPHDR.biYPelsPerMeter, 4, 1, fp);
+	fread(&BMPHDR.biClrUsed, 4, 1, fp); 
+	fread(&BMPHDR.biClrImportant, 4, 1, fp);	
+	if(BMPHDR.bfType1 !='B' || BMPHDR.bfType2 !='M' || BMPHDR.biBitCount !=24) {
+		printf("Файл повреждён\n");
+		return FALSE;
+	}
+	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
+	int nx=(3*x+3) & (-4);
+		img=(unsigned char *) calloc(nx*y, sizeof(char));
+		fread(img, 1, nx*y,fp);
+		fclose(fp);
+	return TRUE;
+}
+int write(char *name){
+	FILE *fp;
+	if ((fp=fopen(name, "wb"))==NULL) {
+		printf("Ошибка при открытии файла\n");
+		return FALSE;
+	}
+	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
+	int nx=(3*x+3) & (-4);
+		fwrite(&BMPHDR.bfType1, 1, 1, fp);
+		fwrite(&BMPHDR.bfType2, 1, 1, fp);
+		fwrite(&BMPHDR.bfSize, 4, 1, fp);
+		fwrite(&BMPHDR.bfReserved1, 2, 1, fp);
+		fwrite(&BMPHDR.bfReserved2, 2, 1, fp);
+		fwrite(&BMPHDR.bfOffBits, 4, 1, fp);
+		fwrite(&BMPHDR.biSize, 4, 1, fp);
+		fwrite(&BMPHDR.biWidth, 4, 1, fp);
+		fwrite(&BMPHDR.biHeight, 4, 1, fp);
+		fwrite(&BMPHDR.biPlanes, 2, 1, fp);
+		fwrite(&BMPHDR.biBitCount, 2, 1, fp);
+		fwrite(&BMPHDR.biCompression, 4, 1, fp);
+		fwrite(&BMPHDR.biSizeImage, 4, 1, fp);
+		fwrite(&BMPHDR.biXPelsPerMeter, 4, 1, fp);
+		fwrite(&BMPHDR.biYPelsPerMeter, 4, 1, fp);
+		fwrite(&BMPHDR.biClrUsed, 4, 1, fp); 
+		fwrite(&BMPHDR.biClrImportant, 4, 1, fp);
+		fwrite(img, sizeof (char), nx*y, fp);
+		fclose(fp);
+	return TRUE;
+}
