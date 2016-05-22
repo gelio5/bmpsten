@@ -26,11 +26,14 @@ struct BMPheader{
 	unsigned long biClrImportant; //количество важных цветов
 }BMPHDR;
 #pragma pack(pop)
-int read(char *name);
-int write(char *name);
-unsigned char *img;
+int imgread(char *name);
+int imgwrite(char *name);
+unsigned char *img,*fl;
 int test(unsigned char *img);
 void aimwrite(unsigned char *img);
+int flread(char *name);
+long s,k=14,step;
+void chng(int);
 
 int main(int argc, char *argv[]){
 	if ((argc!=5)||strcmp(argv[1],"-f")!=0||strcmp(argv[3],"-i")!=0){
@@ -40,12 +43,12 @@ int main(int argc, char *argv[]){
 	}
 	struct stat st;
 		stat(argv[2],&st);
-	long s=st.st_size;
-		if (read(argv[4]) == 0){ 
+	s=st.st_size;
+		if (imgread(argv[4]) == 0){ 
 			printf("Невозможно открыть\\прочитать изначальный файл\n");
 			exit(3);
 		}
-		if (write(argv[4])==0){
+		if (imgwrite(argv[4])==0){
 			printf("Невозможно записать в файл");
 			exit(3);
 		}
@@ -55,12 +58,39 @@ int main(int argc, char *argv[]){
 			exit(2);
 		}
 		if (test(img)==5){
-			long step=maxlen/s+1;
+			step=maxlen/s+1;
 			FILE *Key;
-			Key=fopen("y.ek","wb");
-			fwrite(&step,4,1,Key);
-			fclose(Key);
+				Key=fopen("y.ek","wb");
+				fwrite(&step,4,1,Key);
+				fclose(Key);
 			aimwrite(img);
+			flread(argv[2]);
+			int i,j;
+			for (i=0;i<s;++i){
+				j=fl[i]&128;
+				j>>=7;
+				chng(j);
+				j=fl[i]&64;
+				j>>=6;
+				chng(j);
+				j=fl[i]&32;
+				j>>=5;
+				chng(j);
+				j=fl[i]&16;
+				j>>=4;
+				chng(j);
+				j=fl[i]&8;
+				j>>=3;
+				chng(j);
+				j=fl[i]&4;
+				j>>=2;
+				chng(j);
+				j=fl[i]&2;
+				j>>=1;
+				chng(j);
+				j=fl[i]&1;
+				chng(j);
+			}
 		}else{
 			FILE *Key;
 			unsigned int key;
@@ -75,7 +105,7 @@ int main(int argc, char *argv[]){
 			
 	return 0;
 }
-int read(char *name){
+int imgread(char *name){
 	FILE *fp;
 	if ((fp=fopen(name, "rb"))==NULL) 
 		return FALSE;	
@@ -106,7 +136,7 @@ int read(char *name){
 	return TRUE;
 }
 
-int write(char *name){
+int imgwrite(char *name){
 	FILE *fp;
 	if ((fp=fopen(name, "wb"))==NULL)
 		return FALSE;
@@ -167,4 +197,23 @@ void aimwrite(unsigned char *img){
 	img[11]&=254;
 	img[12]&=254;
 	img[13]|=1;
+}
+
+int flread(char *name){
+	FILE *fp;
+	if ((fp=fopen(name, "rb"))==NULL) 
+		return FALSE;	
+  		fl=(unsigned char *) calloc(s,sizeof(char));
+  		fread(fl,1,s,fp);
+  		fclose(fp);
+  	return TRUE;
+}
+void chng(int j){
+	if (j==1){
+		img[k]|=1;
+		k+=step;
+	}else{
+		img[k]&=254;
+		k+=step;
+	}
 }
