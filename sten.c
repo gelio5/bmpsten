@@ -41,9 +41,7 @@ int main(int argc, char *argv[]){
 		printf("-f\t-для обозначения файла который необходимо зашифровать.\n");
 		printf("-i\t-для изображения в которое необходимо зашифровать.\n");
 	}
-	struct stat st;
-		stat(argv[2],&st);
-	s=st.st_size;
+	
 		if (imgread(argv[4]) == 0){ 
 			printf("Невозможно открыть\\прочитать изначальный файл\n");
 			exit(3);
@@ -52,12 +50,16 @@ int main(int argc, char *argv[]){
 			printf("Невозможно записать в файл");
 			exit(3);
 		}
-	long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
+		long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
+		printf("%ld %ld\n",maxlen,sizeof(img));		
+		if (test(img)==5){
+			struct stat st;
+			stat(argv[2],&st);
+			s=st.st_size;
 		if (maxlen<s){
 			printf("Файл для шифрования не возможно поместить в данное изображение\n");
 			exit(2);
 		}
-		if (test(img)==5){
 			step=maxlen/s+1;
 			FILE *Key;
 				Key=fopen("y.ek","wb");
@@ -93,16 +95,46 @@ int main(int argc, char *argv[]){
 			}
 		}else{
 			FILE *Key;
-			unsigned int key;
 				if (fopen("y.ek","rb")==0){
 					printf("Файл, содержащий ключ для дешифрования, не найден.");
 					exit(1);
 				}
 				Key=fopen("y.ek","rb");
-				fread(&key,4,1,Key);
+				fread(&step,4,1,Key);
 				fclose(Key);
+				printf("%ld\n",step );
+			long i;
+			unsigned char t,k;
+			FILE *ex;
+			ex=fopen(argv[2],"wb");
+				for (i=0;i<maxlen;i+=8*step){
+					k=img[i]&1;
+					t=k;
+					t<<1;
+					k=img[i+step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+2*step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+3*step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+4*step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+5*step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+6*step]&1;
+					t+=k;
+					t<<1;
+					k=img[i+7*step]&1;
+					t+=k;
+					fwrite(&t,1,1,ex);
+				}
+				fclose(ex);
 		}		
-			
 	return 0;
 }
 int imgread(char *name){
