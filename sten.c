@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #define TRUE 1
 #define FALSE 0
+#define shif 5
+#define deshif 9
 #pragma pack(push, 2)
 struct BMPheader{
 	unsigned char bfType1, bfType2; //тип файла (BM)
@@ -24,64 +26,50 @@ struct BMPheader{
 	unsigned long biClrImportant; //количество важных цветов
 }BMPHDR;
 #pragma pack(pop)
-int read(char *name), write(char *name);
+int read(char *name);
+int write(char *name);
 unsigned char *img;
+int test(unsigned char *img);
 
 int main(int argc, char *argv[]){
-	int par;
 	if ((argc!=5)||strcmp(argv[1],"-f")!=0||strcmp(argv[3],"-i")!=0){
 		printf("Для работы программы необходимы ключи:\n");
 		printf("-f\t-для обозначения файла который необходимо зашифровать.\n");
 		printf("-i\t-для изображения в которое необходимо зашифровать.\n");
 	}
-/*	for (par=1;par<argc;++par){
-		if (strcmp(argv[par], "-c")==0){*/
-			struct stat st;
-			FILE *sh; //sh - файл который необхожимо зашифровать
-			char nsh[30],isx[30];
-				strcpy(isx,argv[4]);
-				strcpy(nsh,argv[2]);
-/*				stat(&nsh[30],&st);
-			long s=st.st_size;
-			if (read(&isx[30]) == 0) 
-				printf("Невозможно открыть\\прочитать изначальный файл\n");
-			if (write(&isx[30])==0)
-				printf("Невозможно записать в файл");
-			long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
-			if (maxlen<s){
-				printf("Файл для шифрования не возможно поместить в данное изображение\n");
-				exit(2);
-			}
-			else{
-				long step=maxlen/s+1;
-				long int i=0;
-				do{
+	struct stat st;
+		stat(argv[2],&st);
+	long s=st.st_size;
+	if (read(argv[4]) == 0){ 
+		printf("Невозможно открыть\\прочитать изначальный файл\n");
+		exit(3);
+	}
+	if (write(argv[4])==0){
+		printf("Невозможно записать в файл");
+		exit(3);
+	}
+	long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8*3;
+	printf("%ld %ld",s,maxlen);
+	if (maxlen<s){
+		printf("Файл для шифрования не возможно поместить в данное изображение\n");
+		exit(2);
+	}
+	
+			/*long step=maxlen/s+1;
+			long int i=0;
+			do{
 					++i;
 				}while(img!='\0');
-				printf("%ld\n",i);
-			}
-		}
-		else
-			if(strcmp(argv[par],"-d")==0){
+				printf("%ld\n",i);		
 				FILE *Key,*bmp,*ex; //key - файл с ключом для дешифровки, bmp - файл из которого необходимо жешифровать информацию, ex -  файл, в который записывается дешифрованная информация
 				char key[4]="y.ek",isx[30],out[30];
 				if (fopen(key,"rb")==0){
 					printf("Файл, содержащий ключ для дешифрования, не найден.");
 					exit(1);
 				}
-				printf("Введите название BMP-файла, информацию из которого вы хотите дешифровать.\n");
-				scanf("%s",&isx[30]);
-				if (fopen(key,"rb")==0){
-					printf("Файл с изображением для дешифрования не найден.");
-					exit(1);
-				}
-				printf("Введите название файла, в который необходимо записать результат дешифрования.\n");
-				scanf("%s",&out[30]);
-			}		
-	}*/
+				*/
 	return 0;
 }
-
 int read(char *name){
 	FILE *fp;
 	if ((fp=fopen(name, "rb"))==NULL) 
@@ -139,4 +127,22 @@ int write(char *name){
 		fwrite(img, sizeof (char), nx*y, fp);
 		fclose(fp);
 	return TRUE;
+}
+int test(unsigned char *img){
+	if (img[0]&1!=1) return shif;
+	if (img[1]&1!=1) return shif;
+	if (img[2]&1!=0) return shif;
+	if (img[3]&1!=0) return shif;
+	if (img[4]&1!=0) return shif;
+	if (img[5]&1!=0) return shif;
+	if (img[6]&1!=0) return shif;
+	if (img[7]&1!=0) return shif;
+	if (img[8]&1!=1) return shif;
+	if (img[9]&1!=1) return shif;
+	if (img[10]&1!=1) return shif;
+	if (img[11]&1!=0) return shif;
+	if (img[12]&1!=0) return shif;
+	if (img[13]&1!=1) return shif;
+		else
+			return deshif;
 }
