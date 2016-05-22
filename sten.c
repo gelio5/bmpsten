@@ -33,25 +33,18 @@ int main(void){
 	char nsh[30];
 	scanf("%s",&nsh[30]);
 	stat(&nsh[30],&st);
-	printf("%ld\n",st.st_size);
-	/*if (read("test.bmp") == 0) {
+	long s=st.st_size;
+	if (read("test.bmp") == 0) {
 		printf("всё плохо\n");
 	}
 	if (write("3.bmp") == 0) {
 		printf("всё плохо\n");
 	}
-	int maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
-	char s[maxlen+2];
+	long maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
+	if (maxlen<s)
+		printf("Файл для шифрования не возможно поместить в данное изображение\n");
 	int i=0;
-	int step,size;*/
-		//fgets(s,maxlen+2,stdin);
-		//s[strlen(s)-1]='\0';
-		//if (strlen(s)>maxlen)
-		//	printf("Длина введенной строки превышает максимальное допустимое количество символов для шифрования\n");
-	//	else{
-	//		step=maxlen/strlen(s);
-	//		size=strlen(s);
-	//	}
+	long step,size;
 	return 0;
 }
 
