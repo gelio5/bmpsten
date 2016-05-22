@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <io.h>
+#include <sys/stat.h>
 #define TRUE 1
 #define FALSE 0
 #pragma pack(push, 2)
@@ -28,7 +28,13 @@ int read(char *name), write(char *name);
 unsigned char *img;
 
 int main(void){
-	if (read("test.bmp") == 0) {
+	struct stat st;
+	FILE *sh;
+	char nsh[30];
+	scanf("%s",&nsh[30]);
+	stat(&nsh[30],&st);
+	printf("%ld\n",st.st_size);
+	/*if (read("test.bmp") == 0) {
 		printf("всё плохо\n");
 	}
 	if (write("3.bmp") == 0) {
@@ -37,7 +43,7 @@ int main(void){
 	int maxlen=BMPHDR.biWidth*BMPHDR.biHeight/8;
 	char s[maxlen+2];
 	int i=0;
-	int step,size;
+	int step,size;*/
 		//fgets(s,maxlen+2,stdin);
 		//s[strlen(s)-1]='\0';
 		//if (strlen(s)>maxlen)
