@@ -93,6 +93,7 @@ int main(int argc, char *argv[]){
 				j=fl[i]&1;
 				chng(j);
 			}
+			imgwrite(argv[4]);
 		}else{
 			FILE *Key;
 				if (fopen("y.ek","rb")==0){
@@ -163,7 +164,7 @@ int imgread(char *name){
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
 	int nx=(3*x+3) & (-4);
 		img=(unsigned char *) calloc(nx*y, sizeof(char));
-		fread(img, 1, nx*y,fp);
+		fread(img, 1, x*y,fp);
 		fclose(fp);
 	return TRUE;
 }
@@ -191,7 +192,7 @@ int imgwrite(char *name){
 		fwrite(&BMPHDR.biYPelsPerMeter, 4, 1, fp);
 		fwrite(&BMPHDR.biClrUsed, 4, 1, fp); 
 		fwrite(&BMPHDR.biClrImportant, 4, 1, fp);
-		fwrite(img, sizeof (char), nx*y, fp);
+		fwrite(img, sizeof (char), x*y, fp);
 		fclose(fp);
 	return TRUE;
 }
