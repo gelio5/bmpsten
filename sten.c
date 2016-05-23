@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
 			aimwrite(img);
 			flread(argv[2]);
 			int i,j;
-			for (i=0;i<s;++i){
+			for (i=14;i<s;++i){
 				j=fl[i]&128;
 				j>>=7;
 				chng(j);
@@ -103,12 +103,11 @@ int main(int argc, char *argv[]){
 				Key=fopen("y.ek","rb");
 				fread(&step,4,1,Key);
 				fclose(Key);
-				printf("%ld\n",step );
 			long i;
 			unsigned char t,k;
 			FILE *ex;
 			ex=fopen(argv[2],"wb");
-				for (i=0;i<maxlen;i+=8*step){
+				for (i=14;i<maxlen;i+=8*step){
 					k=img[i]&1;
 					t=k;
 					t<<1;
@@ -164,7 +163,7 @@ int imgread(char *name){
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
 	int nx=(3*x+3) & (-4);
 		img=(unsigned char *) calloc(nx*y, sizeof(char));
-		fread(img, 1, x*y,fp);
+		fread(img, 1, nx*y,fp);
 		fclose(fp);
 	return TRUE;
 }
@@ -192,7 +191,7 @@ int imgwrite(char *name){
 		fwrite(&BMPHDR.biYPelsPerMeter, 4, 1, fp);
 		fwrite(&BMPHDR.biClrUsed, 4, 1, fp); 
 		fwrite(&BMPHDR.biClrImportant, 4, 1, fp);
-		fwrite(img, sizeof (char), x*y, fp);
+		fwrite(img, sizeof (char), nx*y, fp);
 		fclose(fp);
 	return TRUE;
 }
