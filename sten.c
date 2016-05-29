@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 			printf("Невозможно записать в файл");
 			exit(3);
 		}
-		long maxlen=(BMPHDR.biWidth*BMPHDR.biHeight*3-14)/8;
+		long maxlen=(BMPHDR.biWidth*BMPHDR.biHeight*4-14)/8;
 		//printf("%ld %ld\n",maxlen);		
 		if (test(img)==5){
 			struct stat st;
@@ -161,7 +161,7 @@ int imgread(char *name){
 	if(BMPHDR.bfType1 !='B' || BMPHDR.bfType2 !='M' || BMPHDR.biBitCount !=24) 
 		return FALSE;
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
-	int nx=3*x;
+	int nx=(3*x+3) & (-4);
 		img=(unsigned char *) calloc(nx*y, sizeof(char));
 		fread(img, 1, nx*y,fp);
 		fclose(fp);
@@ -173,7 +173,7 @@ int imgwrite(char *name){
 	if ((fp=fopen(name, "wb"))==NULL)
 		return FALSE;
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
-	int nx=3*x;
+	int nx=(3*x+3) & (-4);
 		fwrite(&BMPHDR.bfType1, 1, 1, fp);
 		fwrite(&BMPHDR.bfType2, 1, 1, fp);
 		fwrite(&BMPHDR.bfSize, 4, 1, fp);
