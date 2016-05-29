@@ -46,13 +46,8 @@ int main(int argc, char *argv[]){
 			printf("Невозможно открыть\\прочитать изначальный файл\n");
 			exit(3);
 		}
-		if (imgwrite(argv[4])==0){
-			printf("Невозможно записать в файл");
-			exit(3);
-		}
-		long maxlen=(BMPHDR.biWidth*BMPHDR.biHeight*4-14)/8;
-		//printf("%ld %ld\n",maxlen);		
-		if (test(img)==5){
+		long maxlen=(BMPHDR.biWidth*BMPHDR.biHeight*3-14)/8;		
+		if (test(img)==shif){
 			struct stat st;
 			stat(argv[2],&st);
 			s=st.st_size;
