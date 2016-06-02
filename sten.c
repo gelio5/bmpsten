@@ -32,8 +32,8 @@ unsigned char *img,*fl;
 int test(unsigned char *img);
 void aimwrite(unsigned char *img);
 int flread(char *name);
-long s,k=14,step;
-void chng(int);
+long s,k=3;
+void chng(int, int);
 
 int main(int argc, char *argv[]){
 	if ((argc!=5)||strcmp(argv[1],"-f")!=0||strcmp(argv[3],"-i")!=0){
@@ -41,98 +41,83 @@ int main(int argc, char *argv[]){
 		printf("-f\t-для обозначения файла который необходимо зашифровать.\n");
 		printf("-i\t-для изображения в которое необходимо зашифровать.\n");
 	}
-	
 		if (imgread(argv[4]) == 0){ 
 			printf("Невозможно открыть\\прочитать изначальный файл\n");
 			exit(3);
 		}
-		long maxlen=(BMPHDR.biWidth*BMPHDR.biHeight*3-14)/8;		
+		long maxlen=BMPHDR.biWidth*BMPHDR.biHeight;	
 		if (test(img)==shif){
 			struct stat st;
 			stat(argv[2],&st);
 			s=st.st_size;
-		if (maxlen<s){
-			printf("Файл для шифрования не возможно поместить в данное изображение\n");
-			exit(2);	
-		}
-			step=maxlen*8/s+1;
-			FILE *Key;
-				Key=fopen("y.ek","wb");
-				fwrite(&step,4,1,Key);
-				fclose(Key);
-			aimwrite(img);
-			flread(argv[2]);
-			int i,j;
-			for (i=14;i<s;++i){
-				j=fl[i]&128;
-				j>>=7;
-				chng(j);
-				j=fl[i]&64;
-				j>>=6;
-				chng(j);
-				j=fl[i]&32;
-				j>>=5;
-				chng(j);
-				j=fl[i]&16;
-				j>>=4;
-				chng(j);
-				j=fl[i]&8;
-				j>>=3;
-				chng(j);
-				j=fl[i]&4;
-				j>>=2;
-				chng(j);
-				j=fl[i]&2;
-				j>>=1;
-				chng(j);
-				j=fl[i]&1;
-				chng(j);
+			if (maxlen<s){
+				printf("Файл для шифрования не возможно поместить в данное изображение\n");
+				exit(2);	
 			}
-			imgwrite(argv[4]);
+			FILE *Key;
+				Key=fopen("y.ek","w");
+				fprintf(Key, "%ld", s); //в данный файл записывает размер файла, который необходимо зашифровать
+				fclose(Key);
+				aimwrite(img);
+				flread(argv[2]);
+				int i,j;
+				for (i=0;i<s;++i){ /* цикл, записывающий один символ в один пиксель, первые два бита символа в первый байт пикселя,
+					последующие три бита символа во второй байт пикселя, оставшиеся три бита символа в третий байт*/
+					j=fl[i]&128; //выделяем первый бит символа
+					j>>=7; 
+					chng(j, 1); //включаем/выключаем 7-ой бит в первом байте пикселя
+					j=fl[i]&64; //выделяем второй бит символа
+					j>>=6;
+					chng(j, 0); //включаем/выключаем 8-ой бит в первом байте пикселя
+					k++; //переходим ко второму байту пикселя
+					j=fl[i]&32; //выделяем третий бит символа
+					j>>=5;
+					chng(j, 2); //включаем/выключаем 6-ой бит во втором байте пикселя
+					j=fl[i]&16; //выделяем четвёртый бит символа
+					j>>=4;
+					chng(j, 1); //включаем/выключаем 7-ой бит во втором байте пикселя
+					j=fl[i]&8; //выделяем пятый бит символа
+					j>>=3;
+					chng(j, 0); //включаем/выключаем 8-ой бит во втором байте пикселя
+					k++; //переходим к третьему байту пикселя
+					j=fl[i]&4; //выделяем шестой бит символа
+					j>>=2;
+					chng(j, 2); //включаем/выключаем 6-ой бит в третьем байте пикселя
+					j=fl[i]&2; //выделяем седьмой бит символа
+					j>>=1;
+					chng(j, 1); //включаем/выключаем 7-ой бит в третьем байте пикселя
+					j=fl[i]&1; //выделяем восьмой бит символа
+					chng(j, 0); //включаем/выключаем 8-ой бит в третьем байте пикселя
+					k++; //переходим к первому байту следующего пикселя
+				}	
+				imgwrite(argv[4]);
 		}else{
 			FILE *Key;
-				if (fopen("y.ek","rb")==0){
-					printf("Файл, содержащий ключ для дешифрования, не найден.");
-					exit(1);
-				}
-				Key=fopen("y.ek","rb");
-				fread(&step,4,1,Key);
-				fclose(Key);
-			long i;
-			unsigned char t,k;
+			if ((Key=fopen("y.ek","r"))==0){
+				printf("Файл, содержащий ключ для дешифрования, не найден.");
+				exit(1);
+			}
+			fscanf(Key, "%ld", &s);
+			fclose(Key);
+			unsigned char b, c=0;
 			FILE *ex;
 			ex=fopen(argv[2],"wb");
-				for (i=14;i<maxlen;i+=8*step){
-					k=img[i]&1;
-					t=k;
-					t<<1;
-					k=img[i+step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+2*step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+3*step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+4*step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+5*step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+6*step]&1;
-					t+=k;
-					t<<1;
-					k=img[i+7*step]&1;
-					t+=k;
-					fwrite(&t,1,1,ex);
-				}
-				fclose(ex);
-		}		
+			for (k=3;k<s*3+3; k=k+3){ //в файле s байт, каждый закодирован в 1 пиксель (в 3 байта) и первые три байта занимает символ %
+				b=img[k]&3; //выделяем два последних бита, умножаем на 3 (11)
+				c+=b;
+				c=c<<3;
+				b=img[k+1]&7; //выделяем три последних бита, умножаем на 7 (111)
+				c+=b;
+				c=c<<3;
+				b=img[k+2]&7; //выделяем три последних бита, умножаем на 7 (111)
+				c+=b;
+				fwrite(&c,1,1,ex);
+				c=0;}
+			fclose(ex);
+		}	
 	return 0;
 }
-int imgread(char *name){
+int imgread(char *name){ //функция чтения из bmp файла
 	FILE *fp;
 	if ((fp=fopen(name, "rb"))==NULL) 
 		return FALSE;	
@@ -156,19 +141,19 @@ int imgread(char *name){
 	if(BMPHDR.bfType1 !='B' || BMPHDR.bfType2 !='M' || BMPHDR.biBitCount !=24) 
 		return FALSE;
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
-	int nx=(3*x+3) & (-4);
+	int nx=3*x;
 		img=(unsigned char *) calloc(nx*y, sizeof(char));
 		fread(img, 1, nx*y,fp);
 		fclose(fp);
 	return TRUE;
 }
 
-int imgwrite(char *name){
+int imgwrite(char *name){ //функция записи в bmp файл
 	FILE *fp;
 	if ((fp=fopen(name, "wb"))==NULL)
 		return FALSE;
 	int x=BMPHDR.biWidth, y=BMPHDR.biHeight;
-	int nx=(3*x+3) & (-4);
+    int nx=3*x;
 		fwrite(&BMPHDR.bfType1, 1, 1, fp);
 		fwrite(&BMPHDR.bfType2, 1, 1, fp);
 		fwrite(&BMPHDR.bfSize, 4, 1, fp);
@@ -190,43 +175,21 @@ int imgwrite(char *name){
 		fclose(fp);
 	return TRUE;
 }
-
-int test(unsigned char *img){
-	if (img[0]&1!=1) return shif;
-	if (img[1]&1!=1) return shif;
-	if (img[2]&1!=0) return shif;
-	if (img[3]&1!=0) return shif;
-	if (img[4]&1!=0) return shif;
-	if (img[5]&1!=0) return shif;
-	if (img[6]&1!=0) return shif;
-	if (img[7]&1!=0) return shif;
-	if (img[8]&1!=1) return shif;
-	if (img[9]&1!=1) return shif;
-	if (img[10]&1!=1) return shif;
-	if (img[11]&1!=0) return shif;
-	if (img[12]&1!=0) return shif;
-	if (img[13]&1!=1) return shif;
-		else
+int test(unsigned char *img){ //в один пиксель шифруется уникальная последовательность (в данном случает это %, в двоичном виде 00100101)
+	if (img[0]&3!=0) return shif; //в первом байте пикселя проверям два последних бита (должны быть 00), поэтому маска 3 (11)
+	if (img[1]&7!=4) return shif; //во втором байте пикселя проверям три последних бита (должны быть 100), поэтому маска 7 (111)
+	if (img[2]&7!=5) return shif; //в третьем байте пикселя проверям три последних бита (должны быть 101), поэтому маска 7 (111)
+	else
 			return deshif;
+}	
+void aimwrite(unsigned char *img){ //записываем в первый пиксель уникальную последовательность (%, в двоичном виде 00100101)
+	img[0]&=252; //в первом байте пикселя заменяем два последних бита на 00, маска: &=252, т. е. &=11111100
+	img[1]&=252; 
+    img[1]|=4; //во втором байте пикселя заменяем три последних бита на 100, маска (img[1]&252)|4, т. е. (img[1]&11111100)|100
+	img[2]&=252;  
+	img[2]|5; //в третьем байте пикселя заменяем три последних бита на 101, маска (img[1]&252)|5, т. е. (img[1]&11111100)|101       
 }
-void aimwrite(unsigned char *img){
-	img[0]|=1;
-	img[1]|=1;
-	img[2]&=254;
-	img[3]&=254;
-	img[4]&=254;
-	img[5]&=254;
-	img[6]&=254;
-	img[7]&=254;
-	img[8]|=1;
-	img[9]|=1;
-	img[10]|=1;
-	img[11]&=254;
-	img[12]&=254;
-	img[13]|=1;
-}
-
-int flread(char *name){
+int flread(char *name){ //функция, читающая данные из файла
 	FILE *fp;
 	if ((fp=fopen(name, "rb"))==NULL) 
 		return FALSE;	
@@ -235,12 +198,10 @@ int flread(char *name){
   		fclose(fp);
   	return TRUE;
 }
-void chng(int j){
-	if (j==1){
-		img[k]|=1;
-		k+=step;
-	}else{
-		img[k]&=254;
-		k+=step;
-	}
-}
+void chng(int j, int z){ //функция включающая/выключающая бит
+	if (j==1)
+		img[k]|=1<<z; //включение бита
+	else
+		img[k]&=~(1<<z); //выключение бита
+}	
+
